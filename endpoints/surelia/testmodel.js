@@ -9,7 +9,7 @@ co(function*() {
         option: { //detail https://github.com/andris9/inbox#create-new-imap-connection
             secureConnection: true,
             auth: {
-                user: 'asdfas',
+                user: 'jasoet87@gmail.com',
                 pass: 'asdf'
             },
             debug: true
@@ -19,25 +19,20 @@ co(function*() {
     var surelia = Surelia(confExample.port, confExample.host, confExample.option);
     yield surelia.connect();
     var mailboxed = yield surelia.listMailboxes();
-    var options = {
-        path: "INBOX",
-        readOnly: false,
-        from: 0,
-        limit: 10
-    };
-    var messages = yield surelia.listEmails(false,options);
     console.info(mailboxed);
+    var messages = yield surelia.listEmails(false, "INBOX",false, 0, 10);
+    console.info(messages);
 
     options = {
         path: "INBOX",
         readOnly: false,
-        iud: messages[0].UID
+        iud: 1
     };
 
-    var letter = yield surelia.readEmail(false,options);
+    var letter = yield surelia.readEmailRaw(false, "INBOX",false,messages[0].UID);
     console.info(letter);
 
-})(function(){
+})(function () {
     console.info(arguments);
     process.exit(0);
 });
