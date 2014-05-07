@@ -9,8 +9,8 @@ co(function*() {
         option: { //detail https://github.com/andris9/inbox#create-new-imap-connection
             secureConnection: true,
             auth: {
-                user: 'jasoet87@gmail.com',
-                pass: 'asdfasdf'
+                user: 'medh4.andro@gmail.com',
+                pass: 'masjasoet'
             },
             debug: true
         }
