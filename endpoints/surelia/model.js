@@ -81,15 +81,9 @@ Surelia.prototype.readEmailRaw = function (ctx, path, readOnly, uid) {
                 var result = Buffer.concat(chunks, chunklength).toString();
                 callback(null, result);
             });
-        });
-    }
-};
-
-Surelia.prototype.readHeaders = function (ctx, path, readOnly, uid) {
-    var self = this;
-    return function (callback) {
-        self.client.openMailbox(path, readOnly, function () {
-            self.client.fetchData(uid, callback);
+            messageStream.on("error", function (err) {
+                callback(err);
+            });
         });
     }
 };
@@ -103,6 +97,11 @@ Surelia.prototype.sendEmail = function* (ctx, options) {
 Surelia.prototype.readEmail = function (ctx, path, readOnly, uid) {
     var self = this;
     return function (callback) {
+        var mailparser = new MailParser({
+            streamAttachments: true
+        });
+
+
         self.client.openMailbox(path, readOnly, function () {
             var chunks = [],
                 chunklength = 0,
@@ -113,7 +112,13 @@ Surelia.prototype.readEmail = function (ctx, path, readOnly, uid) {
             });
             messageStream.on("end", function () {
                 var result = Buffer.concat(chunks, chunklength).toString();
-                callback(null, result);
+                mailparser.write(result);
+
+                mailparser.on("end", function(mailObject){
+                    callback(null, mailObject);
+                });
+
+                mailparser.end();
             });
         });
     }

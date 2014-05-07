@@ -10,7 +10,7 @@ co(function*() {
             secureConnection: true,
             auth: {
                 user: 'jasoet87@gmail.com',
-                pass: 'asdf'
+                pass: 'asdfasdf'
             },
             debug: true
         }
@@ -18,23 +18,10 @@ co(function*() {
 
     var surelia = Surelia(confExample.port, confExample.host, confExample.option);
     yield surelia.connect();
-//    var mailboxed = yield surelia.listMailboxes();
-//    console.info(mailboxed);
-    var messages = yield surelia.listEmails(false, "INBOX", true, 0, 10);
-//    console.info(messages);
+    var messages = yield surelia.listEmails(false, "INBOX", true, -1, 1);
 
-
-    var letter = yield surelia.readHeaders(false, "INBOX", true, messages[0].UID);
-    console.info(letter.flags);
-
-    var flags = yield surelia.markUnread(false, "INBOX", true, messages[0].UID);
-    console.info(flags);
-
-      flags = yield surelia.markRead(false, "INBOX", true, messages[0].UID);
-    console.info(flags);
-
-    letter = yield surelia.readHeaders(false, "INBOX", true, messages[0].UID);
-    console.info(letter.flags);
+    var letter = yield surelia.readEmail(false, "INBOX", true, messages[0].UID);
+    console.info(letter);
 
 })(function () {
     console.info(arguments);
