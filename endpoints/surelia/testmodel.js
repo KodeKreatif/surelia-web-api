@@ -18,19 +18,23 @@ co(function*() {
 
     var surelia = Surelia(confExample.port, confExample.host, confExample.option);
     yield surelia.connect();
-    var mailboxed = yield surelia.listMailboxes();
-    console.info(mailboxed);
-    var messages = yield surelia.listEmails(false, "INBOX",false, 0, 10);
-    console.info(messages);
+//    var mailboxed = yield surelia.listMailboxes();
+//    console.info(mailboxed);
+    var messages = yield surelia.listEmails(false, "INBOX", true, 0, 10);
+//    console.info(messages);
 
-    options = {
-        path: "INBOX",
-        readOnly: false,
-        iud: 1
-    };
 
-    var letter = yield surelia.readEmailRaw(false, "INBOX",false,messages[0].UID);
-    console.info(letter);
+    var letter = yield surelia.readHeaders(false, "INBOX", true, messages[0].UID);
+    console.info(letter.flags);
+
+    var flags = yield surelia.markUnread(false, "INBOX", true, messages[0].UID);
+    console.info(flags);
+
+      flags = yield surelia.markRead(false, "INBOX", true, messages[0].UID);
+    console.info(flags);
+
+    letter = yield surelia.readHeaders(false, "INBOX", true, messages[0].UID);
+    console.info(letter.flags);
 
 })(function () {
     console.info(arguments);

@@ -28,7 +28,8 @@
         "koa": "~0.6.0",
         "mongoose": "~3.8.8",
         "inbox": "~1.1.53",
-        "thunkify": "~2.1.1"
+        "thunkify": "~2.1.1",
+        "mailparser": "~0.4.3"
     },
     "devDependencies": {
         "should": "~3.3.0",

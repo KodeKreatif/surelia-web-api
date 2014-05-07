@@ -1,5 +1,6 @@
 var Inbox = require('inbox');
 var _ = require("lodash");
+var MailParser = require("mailparser").MailParser;
 
 /**
  * Surelia class
@@ -28,62 +29,94 @@ Surelia.prototype.listMailboxes = function (ctx, options) {
     }
 };
 
-Surelia.prototype.listEmails = function (ctx, path,readOnly,from,limit) {
+Surelia.prototype.listEmails = function (ctx, path, readOnly, from, limit) {
 
     var self = this;
     return function (callback) {
         self.client.openMailbox(path, readOnly, function () {
-            self.client.listMessages(from, limit,callback);
+            self.client.listMessages(from, limit, callback);
         });
     }
 };
 
-Surelia.prototype.readEmail = function (ctx, path,readOnly,uid) {
-
+Surelia.prototype.markRead = function (ctx, path, readOnly, uid) {
+    var self = this;
+    return function (callback) {
+        self.client.openMailbox(path, readOnly, function () {
+            self.client.addFlags(uid, ["\\Seen"], callback)
+        });
+    }
 };
 
-Surelia.prototype.markRead = function* (ctx, options) {
-    cb(null, {});
-}
+Surelia.prototype.markUnread = function (ctx, path, readOnly, uid) {
+    var self = this;
+    return function (callback) {
+        self.client.openMailbox(path, readOnly, function () {
+            self.client.removeFlags(uid, ["\\Seen"], callback)
+        });
+    }
+};
 
-Surelia.prototype.markUnread = function* (ctx, options) {
-    cb(null, {});
-}
+Surelia.prototype.deleteEmail = function (ctx, path, readOnly, uid) {
+    var self = this;
+    return function (callback) {
+        self.client.openMailbox(path, readOnly, function () {
+            self.client.deleteMessage(uid, callback)
+        });
+    }
+};
 
-Surelia.prototype.deleteEmail = function* (ctx, options) {
-    cb(null, {});
-}
-
-Surelia.prototype.readEmailRaw = function (ctx, path,readOnly,uid) {
+Surelia.prototype.readEmailRaw = function (ctx, path, readOnly, uid) {
     var self = this;
     return function (callback) {
         self.client.openMailbox(path, readOnly, function () {
             var chunks = [],
                 chunklength = 0,
                 messageStream = self.client.createMessageStream(uid);
-            messageStream.on("data", function(chunk){
+            messageStream.on("data", function (chunk) {
                 chunks.push(chunk);
                 chunklength += chunk.length;
             });
-            messageStream.on("end", function(){
+            messageStream.on("end", function () {
                 var result = Buffer.concat(chunks, chunklength).toString();
-                callback(null,result);
+                callback(null, result);
             });
         });
     }
 };
 
-Surelia.prototype.readHeaders = function (ctx, path,readOnly,uid) {
+Surelia.prototype.readHeaders = function (ctx, path, readOnly, uid) {
     var self = this;
     return function (callback) {
         self.client.openMailbox(path, readOnly, function () {
-            self.client.fetchData(uid,callback);
+            self.client.fetchData(uid, callback);
         });
     }
 };
 
 Surelia.prototype.sendEmail = function* (ctx, options) {
     cb(null, {});
-}
+};
+
+
+
+Surelia.prototype.readEmail = function (ctx, path, readOnly, uid) {
+    var self = this;
+    return function (callback) {
+        self.client.openMailbox(path, readOnly, function () {
+            var chunks = [],
+                chunklength = 0,
+                messageStream = self.client.createMessageStream(uid);
+            messageStream.on("data", function (chunk) {
+                chunks.push(chunk);
+                chunklength += chunk.length;
+            });
+            messageStream.on("end", function () {
+                var result = Buffer.concat(chunks, chunklength).toString();
+                callback(null, result);
+            });
+        });
+    }
+};
 
 module.exports = Surelia;
