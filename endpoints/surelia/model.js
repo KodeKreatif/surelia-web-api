@@ -29,50 +29,50 @@ Surelia.prototype.listMailboxes = function (ctx, options) {
     }
 };
 
-Surelia.prototype.listEmails = function (ctx, path, readOnly, from, limit) {
+Surelia.prototype.listEmails = function (ctx, options) {
 
     var self = this;
     return function (callback) {
-        self.client.openMailbox(path, readOnly, function () {
-            self.client.listMessages(from, limit, callback);
+        self.client.openMailbox(options.path, options.readOnly, function () {
+            self.client.listMessages(options.from, options.limit, callback);
         });
     }
 };
 
-Surelia.prototype.markRead = function (ctx, path, readOnly, uid) {
+Surelia.prototype.markRead = function (ctx,options) {
     var self = this;
     return function (callback) {
-        self.client.openMailbox(path, readOnly, function () {
-            self.client.addFlags(uid, ["\\Seen"], callback)
+        self.client.openMailbox(options.path, options.readOnly, function () {
+            self.client.addFlags(options.uid, ["\\Seen"], callback)
         });
     }
 };
 
-Surelia.prototype.markUnread = function (ctx, path, readOnly, uid) {
+Surelia.prototype.markUnread = function (ctx, options) {
     var self = this;
     return function (callback) {
-        self.client.openMailbox(path, readOnly, function () {
-            self.client.removeFlags(uid, ["\\Seen"], callback)
+        self.client.openMailbox(options.path, options.readOnly, function () {
+            self.client.removeFlags(options.uid, ["\\Seen"], callback)
         });
     }
 };
 
-Surelia.prototype.deleteEmail = function (ctx, path, readOnly, uid) {
+Surelia.prototype.deleteEmail = function (ctx, options) {
     var self = this;
     return function (callback) {
-        self.client.openMailbox(path, readOnly, function () {
-            self.client.deleteMessage(uid, callback)
+        self.client.openMailbox(options.path, options.readOnly, function () {
+            self.client.deleteMessage(options.uid, callback)
         });
     }
 };
 
-Surelia.prototype.readEmailRaw = function (ctx, path, readOnly, uid) {
+Surelia.prototype.readEmailRaw = function (ctx,options) {
     var self = this;
     return function (callback) {
-        self.client.openMailbox(path, readOnly, function () {
+        self.client.openMailbox(options.path, options.readOnly, function () {
             var chunks = [],
                 chunklength = 0,
-                messageStream = self.client.createMessageStream(uid);
+                messageStream = self.client.createMessageStream(options.uid);
             messageStream.on("data", function (chunk) {
                 chunks.push(chunk);
                 chunklength += chunk.length;
@@ -94,7 +94,7 @@ Surelia.prototype.sendEmail = function* (ctx, options) {
 
 
 
-Surelia.prototype.readEmail = function (ctx, path, readOnly, uid) {
+Surelia.prototype.readEmail = function (ctx, options) {
     var self = this;
     return function (callback) {
         var mailparser = new MailParser({
@@ -102,10 +102,10 @@ Surelia.prototype.readEmail = function (ctx, path, readOnly, uid) {
         });
 
 
-        self.client.openMailbox(path, readOnly, function () {
+        self.client.openMailbox(options.path, options.readOnly, function () {
             var chunks = [],
                 chunklength = 0,
-                messageStream = self.client.createMessageStream(uid);
+                messageStream = self.client.createMessageStream(options.uid);
             messageStream.on("data", function (chunk) {
                 chunks.push(chunk);
                 chunklength += chunk.length;

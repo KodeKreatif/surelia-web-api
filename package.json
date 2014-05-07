@@ -29,7 +29,8 @@
         "mongoose": "~3.8.8",
         "inbox": "~1.1.53",
         "thunkify": "~2.1.1",
-        "mailparser": "~0.4.3"
+        "mailparser": "~0.4.3",
+        "request":"~2.34.0"
     },
     "devDependencies": {
         "should": "~3.3.0",
