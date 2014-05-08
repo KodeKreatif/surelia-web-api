@@ -1,6 +1,7 @@
 var Inbox = require('inbox');
 var _ = require("lodash");
 var MailParser = require("mailparser").MailParser;
+var nodemailer = require("nodemailer");
 
 /**
  * Surelia class
@@ -10,7 +11,6 @@ function Surelia(port, host, options) {
     if (!(this instanceof Surelia)) return new Surelia(port, host, options);
     this.name = "surelia";
     this.client = Inbox.createConnection(port, host, options);
-    return this;
 }
 
 Surelia.prototype.connect = function (ctx, options) {
@@ -39,7 +39,7 @@ Surelia.prototype.listEmails = function (ctx, options) {
     }
 };
 
-Surelia.prototype.markRead = function (ctx,options) {
+Surelia.prototype.markRead = function (ctx, options) {
     var self = this;
     return function (callback) {
         self.client.openMailbox(options.path, options.readOnly, function () {
@@ -66,7 +66,7 @@ Surelia.prototype.deleteEmail = function (ctx, options) {
     }
 };
 
-Surelia.prototype.readEmailRaw = function (ctx,options) {
+Surelia.prototype.readEmailRaw = function (ctx, options) {
     var self = this;
     return function (callback) {
         self.client.openMailbox(options.path, options.readOnly, function () {
@@ -88,10 +88,21 @@ Surelia.prototype.readEmailRaw = function (ctx,options) {
     }
 };
 
-Surelia.prototype.sendEmail = function* (ctx, options) {
-    cb(null, {});
-};
+Surelia.prototype.sendEmail = function (ctx, options) {
+    var self = this;
+    this.smtpTransport = nodemailer.createTransport(options.protocol, options);
+    return function (callback) {
+        self.smtpTransport.sendMail(options.mailOptions, function(error, response){
+            if(error){
+                callback(error);
+            }else{
+                callback(null, response);
+            }
 
+            self.smtpTransport.close();
+        });
+    }
+};
 
 
 Surelia.prototype.readEmail = function (ctx, options) {
@@ -114,7 +125,7 @@ Surelia.prototype.readEmail = function (ctx, options) {
                 var result = Buffer.concat(chunks, chunklength).toString();
                 mailparser.write(result);
 
-                mailparser.on("end", function(mailObject){
+                mailparser.on("end", function (mailObject) {
                     callback(null, mailObject);
                 });
 
