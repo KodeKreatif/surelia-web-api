@@ -38,7 +38,7 @@ co(function*() {
     options = {
         path: "INBOX",
         readOnly: true,
-        uid: messages[0].UID
+        uid: messages.data[0].UID
     };
 
 

@@ -10,6 +10,17 @@ var nodemailer = require("nodemailer");
 function Surelia(port, host, options) {
     if (!(this instanceof Surelia)) return new Surelia(port, host, options);
     this.name = "surelia";
+    if (_.isEmpty(options)) {
+        options = { //detail https://github.com/andris9/inbox#create-new-imap-connection
+            secureConnection: true,
+            service: "Gmail",
+            auth: {
+                user: '',
+                pass: ''
+            },
+            debug: false
+        };
+    }
     this.client = Inbox.createConnection(port, host, options);
 }
 
@@ -25,7 +36,26 @@ Surelia.prototype.connect = function (ctx, options) {
 Surelia.prototype.listMailboxes = function (ctx, options) {
     var self = this;
     return function (callback) {
-        self.client.listMailboxes(callback);
+        self.client.listMailboxes(function (err, mbox) {
+            if (err) {
+                callback(err);
+            } else if (_.isArray(mbox)) {
+                var retval = {
+                    type: "list",
+                    count: mbox.length,
+                    data: mbox
+                };
+                callback(null, retval);
+            } else {
+                mbox = [];
+                retval = {
+                    type: "list",
+                    count: mbox.length,
+                    data: mbox
+                };
+                callback(null, retval);
+            }
+        });
     }
 };
 
@@ -34,7 +64,26 @@ Surelia.prototype.listEmails = function (ctx, options) {
     var self = this;
     return function (callback) {
         self.client.openMailbox(options.path, options.readOnly, function () {
-            self.client.listMessages(options.from, options.limit, callback);
+            self.client.listMessages(options.from, options.limit, function (err, messages) {
+                if (err) {
+                    callback(err);
+                } else if (_.isArray(messages)) {
+                    var retval = {
+                        type: "list",
+                        count: messages.length,
+                        data: messages
+                    };
+                    callback(null, retval);
+                } else {
+                    messages = [];
+                    retval = {
+                        type: "list",
+                        count: messages.length,
+                        data: messages
+                    };
+                    callback(null, retval);
+                }
+            });
         });
     }
 };
@@ -43,7 +92,26 @@ Surelia.prototype.markRead = function (ctx, options) {
     var self = this;
     return function (callback) {
         self.client.openMailbox(options.path, options.readOnly, function () {
-            self.client.addFlags(options.uid, ["\\Seen"], callback)
+            self.client.addFlags(options.uid, ["\\Seen"], function(err,flags){
+                if (err) {
+                    callback(err);
+                } else if (_.isArray(flags)) {
+                    var retval = {
+                        type: "list",
+                        count: flags.length,
+                        data: flags
+                    };
+                    callback(null, retval);
+                } else {
+                    flags = [];
+                    retval = {
+                        type: "list",
+                        count: flags.length,
+                        data: flags
+                    };
+                    callback(null, retval);
+                }
+            });
         });
     }
 };
@@ -52,7 +120,26 @@ Surelia.prototype.markUnread = function (ctx, options) {
     var self = this;
     return function (callback) {
         self.client.openMailbox(options.path, options.readOnly, function () {
-            self.client.removeFlags(options.uid, ["\\Seen"], callback)
+            self.client.removeFlags(options.uid, ["\\Seen"], function(err,flags){
+                if (err) {
+                    callback(err);
+                } else if (_.isArray(flags)) {
+                    var retval = {
+                        type: "list",
+                        count: flags.length,
+                        data: flags
+                    };
+                    callback(null, retval);
+                } else {
+                    flags = [];
+                    retval = {
+                        type: "list",
+                        count: flags.length,
+                        data: flags
+                    };
+                    callback(null, retval);
+                }
+            })
         });
     }
 };
@@ -79,7 +166,12 @@ Surelia.prototype.readEmailRaw = function (ctx, options) {
             });
             messageStream.on("end", function () {
                 var result = Buffer.concat(chunks, chunklength).toString();
-                callback(null, result);
+                var retval = {
+                    type: "object",
+                    data: result
+                };
+                callback(null, retval);
+
             });
             messageStream.on("error", function (err) {
                 callback(err);
@@ -92,10 +184,10 @@ Surelia.prototype.sendEmail = function (ctx, options) {
     var self = this;
     this.smtpTransport = nodemailer.createTransport(options.protocol, options.transportOption);
     return function (callback) {
-        self.smtpTransport.sendMail(options.mailOptions, function(error, response){
-            if(error){
+        self.smtpTransport.sendMail(options.mailOptions, function (error, response) {
+            if (error) {
                 callback(error);
-            }else{
+            } else {
                 callback(null, response);
             }
 
@@ -126,7 +218,12 @@ Surelia.prototype.readEmail = function (ctx, options) {
                 mailparser.write(result);
 
                 mailparser.on("end", function (mailObject) {
-                    callback(null, mailObject);
+
+                    var retval = {
+                        type: "object",
+                        data: mailObject
+                    };
+                    callback(null, retval);
                 });
 
                 mailparser.end();
