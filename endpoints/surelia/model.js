@@ -90,7 +90,7 @@ Surelia.prototype.readEmailRaw = function (ctx, options) {
 
 Surelia.prototype.sendEmail = function (ctx, options) {
     var self = this;
-    this.smtpTransport = nodemailer.createTransport(options.protocol, options);
+    this.smtpTransport = nodemailer.createTransport(options.protocol, options.transportOption);
     return function (callback) {
         self.smtpTransport.sendMail(options.mailOptions, function(error, response){
             if(error){
