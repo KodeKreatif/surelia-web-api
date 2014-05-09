@@ -1,35 +1,41 @@
 {
-  "name": "surelia-web-api",
-  "version": "0.0.1",
-  "description": "surelia-web api layer",
-  "main": "index.js",
-  "scripts": {
-    "test": "make test"
-  },
-  "keywords": [
-    "e-office",
-    "api"
-  ],
-  "author": "Dhi Aurrahman <diorahman@rockybars.com>",
-  "license": "MIT",
-  "dependencies": {
-    "panas": "0.0.7",
-    "async": "~0.8.0",
-    "qs": "~0.6.6",
-    "koa-qs": "~1.0.0",
-    "lodash": "~2.4.1",
-    "koa-compose": "~2.3.0",
-    "kasta": "0.0.1",
-    "mime": "~1.2.11",
-    "co-busboy": "~1.0.2",
-    "finished": "~1.1.3",
-    "debug": "~0.8.1",
-    "koa": "~0.6.0",
-    "mongoose": "~3.8.8"
-  },
-  "devDependencies": {
-    "should": "~3.3.0",
-    "mocha": "~1.18.2",
-    "supertest": "~0.10.0"
-  }
+    "name": "surelia-web-api",
+    "version": "0.0.1",
+    "description": "surelia-web api layer",
+    "main": "index.js",
+    "scripts": {
+        "test": "make test"
+    },
+    "keywords": [
+        "e-office",
+        "api"
+    ],
+    "author": "Dhi Aurrahman <diorahman@rockybars.com>",
+    "license": "MIT",
+    "dependencies": {
+        "panas": "0.0.7",
+        "async": "~0.8.0",
+        "qs": "~0.6.6",
+        "koa-qs": "~1.0.0",
+        "lodash": "~2.4.1",
+        "koa-compose": "~2.3.0",
+        "kasta": "0.0.1",
+        "mime": "~1.2.11",
+        "co-busboy": "~1.0.2",
+        "co": "~3.0.6",
+        "finished": "~1.1.3",
+        "debug": "~0.8.1",
+        "koa": "~0.6.0",
+        "mongoose": "~3.8.8",
+        "inbox": "~1.1.53",
+        "thunkify": "~2.1.1",
+        "mailparser": "~0.4.3",
+        "request": "~2.34.0",
+        "nodemailer": "~0.6.3"
+    },
+    "devDependencies": {
+        "should": "~3.3.0",
+        "mocha": "~1.18.2",
+        "supertest": "~0.10.0"
+    }
 }
