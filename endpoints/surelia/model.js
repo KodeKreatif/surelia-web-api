@@ -92,25 +92,12 @@ Surelia.prototype.markRead = function (ctx, options) {
     var self = this;
     return function (callback) {
         self.client.openMailbox(options.path, options.readOnly, function () {
-            self.client.addFlags(options.uid, ["\\Seen"], function(err,flags){
-                if (err) {
-                    callback(err);
-                } else if (_.isArray(flags)) {
-                    var retval = {
-                        type: "list",
-                        count: flags.length,
-                        data: flags
-                    };
-                    callback(null, retval);
-                } else {
-                    flags = [];
-                    retval = {
-                        type: "list",
-                        count: flags.length,
-                        data: flags
-                    };
-                    callback(null, retval);
-                }
+            self.client.addFlags(options.uid, ["\\Seen"], function (err, flags) {
+                var retval = {
+                    type: "object",
+                    data: options.uid
+                };
+                callback(err, retval);
             });
         });
     }
@@ -120,25 +107,12 @@ Surelia.prototype.markUnread = function (ctx, options) {
     var self = this;
     return function (callback) {
         self.client.openMailbox(options.path, options.readOnly, function () {
-            self.client.removeFlags(options.uid, ["\\Seen"], function(err,flags){
-                if (err) {
-                    callback(err);
-                } else if (_.isArray(flags)) {
-                    var retval = {
-                        type: "list",
-                        count: flags.length,
-                        data: flags
-                    };
-                    callback(null, retval);
-                } else {
-                    flags = [];
-                    retval = {
-                        type: "list",
-                        count: flags.length,
-                        data: flags
-                    };
-                    callback(null, retval);
-                }
+            self.client.removeFlags(options.uid, ["\\Seen"], function (err, flags) {
+                var retval = {
+                    type: "object",
+                    data: options.uid
+                };
+                callback(err, retval);
             })
         });
     }
@@ -148,7 +122,13 @@ Surelia.prototype.deleteEmail = function (ctx, options) {
     var self = this;
     return function (callback) {
         self.client.openMailbox(options.path, options.readOnly, function () {
-            self.client.deleteMessage(options.uid, callback)
+            self.client.deleteMessage(options.uid, function (err, flags) {
+                var retval = {
+                    type: "object",
+                    data: options.uid
+                };
+                callback(err, retval);
+            })
         });
     }
 };
@@ -231,5 +211,41 @@ Surelia.prototype.readEmail = function (ctx, options) {
         });
     }
 };
+
+Surelia.prototype.listAttachments = function* (ctx, options) {
+    var retVal = yield this.readEmail(ctx, options);
+    if (retVal.type === 'object') {
+        var mailObject = retVal.data;
+        if (!_.isEmpty(mailObject.attachments) && _.isArray(mailObject.attachments)) {
+            return{
+                type: 'list', count: mailObject.attachments.length, data: mailObject.attachments
+            }
+        } else {
+            return {
+                type: 'list', count: 0, data: []
+            }
+        }
+    }
+};
+
+Surelia.prototype.streamAttachment = function* (ctx, options) {
+    var retVal = yield this.readEmail(ctx, options);
+    if (retVal.type === 'object') {
+        var mailObject = retVal.data;
+        if (!_.isEmpty(mailObject.attachments) && _.isArray(mailObject.attachments)) {
+            var streamByIndex = mailObject.attachments[options.attachmentIndex];
+            if(streamByIndex){
+                return {type:'object',data: streamByIndex.stream}
+            }else{
+                return {type:'object',data:null}
+            }
+        } else {
+            return {
+                type: 'object', data: null
+            }
+        }
+    }
+};
+
 
 module.exports = Surelia;

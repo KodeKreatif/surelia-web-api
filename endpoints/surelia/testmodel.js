@@ -1,7 +1,7 @@
 var request = require("supertest").agent;
 var Surelia = require("./model");
 var co = require("co");
-
+var fs = require("fs");
 
 co(function*() {
     var confExample = {
@@ -28,8 +28,8 @@ co(function*() {
     var options = {
         path: "INBOX",
         readOnly: true,
-        from: -1,
-        limit: 1
+        from: -5,
+        limit: 5
     };
 
     var messages = yield surelia.listEmails(false, options);
@@ -46,6 +46,29 @@ co(function*() {
     console.info(letter);
     console.info("======================================================================================================================");
 
+    var attachments = yield surelia.listAttachments(false, options);
+    console.info(attachments);
+    attachments.data.forEach(function(attc){
+        var output = fs.createWriteStream(attc.generatedFileName);
+        attc.stream.pipe(output);
+    });
+    console.info("======================================================================================================================");
+
+    options = {
+        path: "INBOX",
+        readOnly: true,
+        uid: messages.data[0].UID,
+        attachmentIndex: 1
+    };
+
+    var attachment = yield surelia.streamAttachment(false,options);
+    console.info(attachment);
+    console.info("Print Stream to File");
+    var output = fs.createWriteStream("attachment");
+    attachment.data.pipe(output);
+    console.info("======================================================================================================================");
+
+
     var letterRaw = yield surelia.readEmailRaw(false, options);
     console.info(letterRaw);
     console.info("======================================================================================================================");
@@ -61,7 +84,7 @@ co(function*() {
         },
         mailOptions: {
             from: "Surelia <surelia@kodekreatif.github.com>", // sender address
-            to: "jasoet87@gmail.com,medha4.andro@gmail.com,mdamt@mdamt.net", // list of receivers
+            to: "jasoet87@gmail.com,medh4.andro@gmail.com", // list of receivers
             subject: "Hello From Surelia ✔", // Subject line
             text: "Hello Surelia ✔", // plaintext body
             html: "<b>Hello world From Surelia ✔</b>", // html body
