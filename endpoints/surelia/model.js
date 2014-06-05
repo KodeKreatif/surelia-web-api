@@ -93,11 +93,8 @@ Surelia.prototype.listMailboxes = function (ctx, options, cb) {
 
     getChildren(total - 1, function() {
       // Expose special boxes
-      var p = function * (next) {
-        this["imapSpecialBoxes"] = specials;
-        yield next;
-      }
-      ctx.app.middleware.unshift(p);
+      ctx.session = ctx.session || {};
+      ctx.session.imapSpecialBoxes = specials;
 
       cb (null, {
         type: "object",
@@ -288,7 +285,7 @@ Surelia.prototype.readHeaders = function (ctx, options, cb) {
 
 Surelia.prototype.checkSpecialBoxes = function (ctx, options, cb) {
   var self = this;
-  if (!ctx.imapSpecialBoxes) {
+  if (!ctx.session.imapSpecialBoxes) {
     self.listMailboxes(ctx, options, cb);
   } else {
     cb(null);
@@ -298,7 +295,7 @@ Surelia.prototype.checkSpecialBoxes = function (ctx, options, cb) {
 Surelia.prototype.composeEmail = function (ctx, options, cb) {
   var self = this;
   self.checkSpecialBoxes(ctx, options, function() {
-    var draft = ctx.imapSpecialBoxes["Drafts"];
+    var draft = ctx.session.imapSpecialBoxes["Drafts"];
     if (!draft) {
       throw (boom.internalServerError("Drafts folder is unavailable"));
     }
@@ -311,7 +308,7 @@ Surelia.prototype.composeEmail = function (ctx, options, cb) {
 Surelia.prototype.updateDraftEmail = function (ctx, options, cb) {
   var self = this;
   self.checkSpecialBoxes(ctx, options, function() {
-    var draft = ctx.imapSpecialBoxes["Drafts"];
+    var draft = ctx.session.imapSpecialBoxes["Drafts"];
     if (!draft) {
       throw (boom.internalServerError("Drafts folder is unavailable"));
     }
@@ -332,8 +329,8 @@ Surelia.prototype.sendDraftEmail = function (ctx, options, cb) {
 
   self.checkSpecialBoxes(ctx, options, function() {
     var client = self.getClient(ctx, options, cb);
-    var draft = ctx.imapSpecialBoxes["Drafts"];
-    var sent = ctx.imapSpecialBoxes["Sent"];
+    var draft = ctx.session.imapSpecialBoxes["Drafts"];
+    var sent = ctx.session.imapSpecialBoxes["Sent"];
     if (!draft) {
       throw (boom.internalServerError("Drafts folder is unavailable"));
     }
@@ -374,8 +371,10 @@ Surelia.prototype.sendDraftEmail = function (ctx, options, cb) {
 
       options.directReturn = true;
       var smtp = mailer.connect(self.options.smtpConfig.port, self.options.smtpConfig.host, self.options.smtpConfig.options);
+      console.log(self.options.smtpConfig);
         console.log("Start sending");
       smtp.once("idle", function() {
+        console.log("idle");
         smtp.useEnvelope({
           from: data.data.from.address,
           to: recipients
