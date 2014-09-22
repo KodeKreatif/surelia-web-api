@@ -15,13 +15,19 @@ var userData = require("./user-test.json");
   var userData = {
     "imap": {
     "host": "localhost",
+    "port": 1143,
     "user": "testuser",
     "pass": "testpass"
     },
     "smtp": {
-    "host": "host.com",
-    "user": "",
-    "pass": ""
+      "host": "localhost",
+      "secure": false,
+      "debug": true,
+      "auth": {
+        "user": "",
+        "pass": "",
+      },
+      "port": 1025
     }
   }
 }
@@ -35,16 +41,7 @@ var options = {
   db : "mongodb://localhost/test", // the db uri
   driver : require ("mongoose"), // the driver
   imapConfig : userData.imap,
-  smtpConfig : {
-    host: userData.smtp.host,
-    options: {
-      secureConnection: true,
-      auth: {
-        user: userData.smtp.user,
-        pass: userData.smtp.pass,
-      }
-    }
-  }
+  smtpConfig : userData.smtp
 }
 
 options =_.merge(policy, options);
@@ -57,12 +54,14 @@ var toServer = function (){ return app.listen()}
 
 before(function(done){
   imapServer = HoodieCrow();
+
   imapServer.listen(1143);
   done();
 });
 
 after(function(done){
-  imapServer.close(done);
+  imapServer.close();
+  done();
 });
 
 describe ("Surelia", function (){
@@ -247,7 +246,7 @@ describe ("Surelia", function (){
 
     var uri = "/api/1/surelia/drafts/" + draftId;
     var data = {
-      message: "From: test@test.com\nTo: mdamt@mnots.eu\nSubject: Test\n\nDraft Message " + (new Date)
+      message: "From: test@test.com\nTo: mdamt@mdamt.net\nSubject: Test\n\nDraft Message " + (new Date)
     };
 
     request (toServer())
@@ -274,7 +273,6 @@ describe ("Surelia", function (){
     .expect (200)
     .end(function (err, res){
      
-      
       done(err);
     });
 

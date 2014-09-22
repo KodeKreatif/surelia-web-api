@@ -368,13 +368,13 @@ Surelia.prototype.sendDraftEmail = function (ctx, options, cb) {
         recipients.push(cc.address);
       });
 
-      var createSent = function(cb) {
+      var createSent = function(callback) {
         var inbox = ctx.session.imapSpecialBoxes["Inbox"];
         sent = inbox.path + "/Sent";
-        client.createMailbox(sent, cb);
+        client.createMailbox(sent, callback);
       }
 
-      var moveMessage = function(cb) {
+      var moveMessage = function() {
         client.moveMessage(options.emailId, sent, function(err, result) {
           if (err) {
             return cb(err);
@@ -384,14 +384,14 @@ Surelia.prototype.sendDraftEmail = function (ctx, options, cb) {
       }
 
       var done = function() {
-        client.openMailbox(draft, function(err, mboxInfo) {
+        client.openMailbox(options.mailbox, function(err, mboxInfo) {
           if (err) {
             return cb(err);
           }
           if (!sent) {
             createSent(moveMessage);
           } else {
-            moveMessage(cb);
+            moveMessage();
           }
         });
       }
