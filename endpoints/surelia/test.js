@@ -21,10 +21,11 @@ var userData = require("./user-test.json");
     },
     "smtp": {
       "host": "localhost",
+      "stripDomain": "dom.com",
       "secure": false,
       "debug": true,
       "auth": {
-        "user": "",
+        "user": "test@dom.com",
         "pass": "",
       },
       "port": 1025

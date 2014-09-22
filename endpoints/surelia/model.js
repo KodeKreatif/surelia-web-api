@@ -397,7 +397,14 @@ Surelia.prototype.sendDraftEmail = function (ctx, options, cb) {
       }
 
       options.directReturn = true;
-      var smtp = mailer.connect(self.options.smtpConfig.port, self.options.smtpConfig.host, self.options.smtpConfig.options);
+      var smtpConfig = self.options.smtpConfig;
+      var auth = smtpConfig.auth;
+      if (auth && auth.user && auth.pass) {
+        if (smtpConfig.stripDomain) {
+          auth.user = auth.user.replace("@" + smtpConfig.stripDomain,"");
+        }
+      }
+      var smtp = mailer.connect(self.options.smtpConfig.port, self.options.smtpConfig.host, self.options.smtpConfig);
       smtp.once("idle", function() {
         smtp.useEnvelope({
           from: data.data.from.address,
