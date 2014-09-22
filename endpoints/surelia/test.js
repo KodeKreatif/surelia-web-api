@@ -128,7 +128,7 @@ describe ("Surelia", function (){
   it ("Get emails in a box", function (done){
 
     // GET
-    var uri = "/api/1/surelia/boxes/INBOX";
+    var uri = "/api/1/surelia/boxes/INBOX?limit=1";
 
     request (toServer())
     .get (uri)
