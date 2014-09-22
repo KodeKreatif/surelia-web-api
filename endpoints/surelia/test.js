@@ -1,8 +1,10 @@
 var request = require ("supertest").agent;
 var async = require ("async");
 var qsify = require ("koa-qs");
+var HoodieCrow = require ("hoodiecrow");
 
-// bootstrap
+
+var imapServer;
 
 var _ = require ("lodash");
 var policy = require ("../../policy");
@@ -10,14 +12,18 @@ var policy = require ("../../policy");
 try {
 var userData = require("./user-test.json");
 } catch(e) {
-  console.log("\n\nPrepare a file called user-test.json containing your imap credentials before starting test");
-  console.log("{{ \"imap\":");
-  console.log("  { \"user\": \"\", \"pass\": \"\"}");
-  console.log("},");
-  console.log("{ \"smtp\":");
-  console.log("  { \"user\": \"\", \"pass\": \"\"}");
-  console.log("}}");
-  process.exit(-1);
+  var userData = {
+    "imap": {
+    "host": "localhost",
+    "user": "testuser",
+    "pass": "testpass"
+    },
+    "smtp": {
+    "host": "host.com",
+    "user": "",
+    "pass": ""
+    }
+  }
 }
 
 
@@ -48,6 +54,16 @@ app.on("error", function(err){console.log(err.stack)})
 
 var toServer = function (){ return app.listen()}
 
+
+before(function(done){
+  imapServer = HoodieCrow();
+  imapServer.listen(1143);
+  done();
+});
+
+after(function(done){
+  imapServer.close(done);
+});
 
 describe ("Surelia", function (){
 

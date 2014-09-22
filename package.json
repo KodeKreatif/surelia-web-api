@@ -29,8 +29,9 @@
     "mailparser": "~0.4.3"
   },
   "devDependencies": {
-    "should": "~3.3.0",
+    "hoodiecrow": "^1.1.21",
     "mocha": "~1.18.2",
+    "should": "~3.3.0",
     "supertest": "~0.10.0"
   }
 }
