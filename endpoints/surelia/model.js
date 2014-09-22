@@ -141,6 +141,7 @@ Surelia.prototype.uploadEmail = function (ctx, options, cb) {
   var mailbox = options.mailbox || ctx.params.id;
   mailbox = this.getMailboxName(mailbox);
   var client = this.getClient(ctx, options, cb);
+
   client.openMailbox(mailbox, function(err, mboxInfo) {
     if (err) {
       return cb(err);
@@ -245,7 +246,6 @@ Surelia.prototype.readEmailRaw = function (ctx, options, cb) {
   var emailId = options.emailId || ctx.params.emailId;
 
   var client = this.getClient(ctx, options, cb);
-  console.log(options);
   client.openMailbox(mailbox, function(err, mboxInfo) {
     if (err) {
       return cb(err);
@@ -253,7 +253,6 @@ Surelia.prototype.readEmailRaw = function (ctx, options, cb) {
 
     var stream = client.createMessageStream(emailId);
     if (options.directReturn) {
-      console.log("ret");
       return cb(null, stream);
     } 
     ctx.type = "text/plain";
@@ -267,7 +266,6 @@ Surelia.prototype.readHeaders = function (ctx, options, cb) {
   mailbox = this.getMailboxName(mailbox);
   var emailId = options.emailId || ctx.params.emailId;
   var client = this.getClient(ctx, options, cb);
-  console.log(options);
   client.openMailbox(mailbox, function(err, mboxInfo) {
     if (err) {
       return cb(err);
@@ -287,6 +285,7 @@ Surelia.prototype.readHeaders = function (ctx, options, cb) {
 
 Surelia.prototype.checkSpecialBoxes = function (ctx, options, cb) {
   var self = this;
+  ctx.session = ctx.session || {};
   if (!ctx.session.imapSpecialBoxes) {
     self.listMailboxes(ctx, options, cb);
   } else {
@@ -348,7 +347,6 @@ Surelia.prototype.sendDraftEmail = function (ctx, options, cb) {
         return cb(err);
       }
       var recipients = [];
-      console.log(data);
       _.each(data.data.to, function(to) {
         recipients.push(to.address);
       });
@@ -365,7 +363,6 @@ Surelia.prototype.sendDraftEmail = function (ctx, options, cb) {
             if (err) {
               return cb(err);
             }
-            console.log("Moved");
             cb(null,{});
           });
         });
@@ -373,22 +370,17 @@ Surelia.prototype.sendDraftEmail = function (ctx, options, cb) {
 
       options.directReturn = true;
       var smtp = mailer.connect(self.options.smtpConfig.port, self.options.smtpConfig.host, self.options.smtpConfig.options);
-      console.log(self.options.smtpConfig);
-        console.log("Start sending");
       smtp.once("idle", function() {
-        console.log("idle");
         smtp.useEnvelope({
           from: data.data.from.address,
           to: recipients
         });
       });
       smtp.on("message", function() {
-        console.log("Sending");
         var stream = client.createMessageStream(options.emailId);
         stream.pipe(smtp);
       });
       smtp.on("ready", function() {
-        console.log("Done");
         done();
       });
       smtp.on("error", function(err) {
